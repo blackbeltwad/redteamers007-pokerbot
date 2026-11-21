@@ -1,0 +1,20 @@
+{
+ "label": "h2_AB",
+ "hero": "lab/snapshots/v2wip::bluff_prior=0.25,rf=0.93",
+ "opps": "core,rand20,exploit,ext",
+ "pairs": 20,
+ "seeds": "dev",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "lab/snapshots/v2wip::bluff_prior=0.25,rf=0.93",
+  "--opps",
+  "core,rand20,exploit,ext",
+  "--pairs",
+  "20",
+  "--label",
+  "h2_AB"
+ ]
+}

@@ -28,3 +28,11 @@ Lang-Chen124/poker-bot@98e5c04, Atharva-Mansabdar/FullHouseHack26@c6c8043. All p
 network/subprocess. Sparring only, never copied. Lab loader now isolates sibling-module imports per bot.
 **Gate v1 vs v0 (holdout, 100 pairs x 37 opps + 200 h2h): PASS.** h2h 73.0% [68.4,77.1] (101-90-9);
 set 71.8% [70.8,72.8] vs 64.0%; 0 errors/timeouts; p99 worst match 501ms (machine was also running other jobs).
+
+## v1 vs ext (dev, 30 pairs x 13 bots): 84.1% [81.4,86.5], pairs 270-116-4. Weakest gunslinger 67% (3/4-bets a lot).
+Leak: postflop over-folding (FtbF/T/R 70/79/85 vs ext).
+
+## H2: over-folding postflop (dev, core+rand20+exploit+ext, 20 pairs, CRN)
+Added TUNE dict + configure() hook (lab-only A/B; sandbox never calls it).
+base(bluff_prior .15) 75.0 | A(.25) 76.1 | A35(.35) 75.4 | B(realisation .93) 75.3 | A+B 75.3  -- all within noise.
+A lowers FtbF/T/R 63/70/73 -> 57/63/66 (less exploitable), core +2, rand +2, ext flat. Chose A -> v2 candidate.

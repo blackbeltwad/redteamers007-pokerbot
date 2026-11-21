@@ -161,3 +161,13 @@ lvl_decay .5: 75.0, .8: 74.3 vs v3 75.9 (dev, full field, 20 pairs). Knob kept a
 Profiling (lab/tools/profile_bot.py): 8% of facing-bet decisions flip with the MC seed. `mc_refine=k`: when eq is within
 0.03 of a value/raise/call threshold, average k extra MC batches (fresh combo samples). k=3: 76.1 vs 75.9, bb/100 62.8 vs 62.4,
 p99 656 ms (busy machine). Flat but sound and cheap -> v3.1 = v3 + mc_refine 3. Final pick v2.1 vs v3.1 by lab/tournament.py (holdout).
+
+## Final selection v2.1 vs v3.1 (lab/tournament.py, holdout, 40-bot field core+ext+dataset, 4 tournaments each)
+v2.1: qual rank 1.0 (4/4), pts 29.9, top 2 4/4, **won 4/4**, p99 297 ms. v3.1: qual rank 1.0 (4/4), pts 30.5, top 2 3/4,
+won 3/4, p99 662 ms. Tie within noise -> v2.1 stays on main (gate-passed).
+Extra checks: fresh clone of main + validator PASSED; 6 docker matches v2.1 vs gunslinger/advit_strong/tumble_dutch
+(3-3, think ~5-10 ms, 0 errors).
+
+## H7-H8: survival margins and sticky-BB opens -- REJECTED (dev, 20 pairs, vs v3.1 76.1 full field / 78.1 on core+ext+dataset)
+var_margin .05 75.7 | .10 75.9 | pf_margin .12 75.9 | var_margin .05 gated by bluff rate 77.9 (vs 78.1) | sticky BB 78.3 (atharva 78->75).
+Target matchups (lag, minraiser, maniac, d_MrPink, gunslinger) identical across all variants: those draws are card-driven.

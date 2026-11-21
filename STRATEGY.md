@@ -40,8 +40,11 @@ from equilibrium only as far as the evidence from the current match justifies.
   never tune to the cards we judge on.
 - **95% confidence intervals** on every number; no change ships without beating the current best on
   hold-out seeds (`lab/gate.py`).
-- **Opponents:** ~130 sparring bots: 10 style archetypes, 20 randomised bots, targeted exploiters, 13 public
-  bots from a previous Fullhouse event, and 14 profiles built from Pluribus/WSOP hand histories.
+- **Opponents:** 64 sparring bots: 10 style archetypes plus the kit's 2 bots, 20 randomised bots, 5 targeted
+  exploiters, 13 public bots from a previous Fullhouse event, and 14 profiles built from Pluribus/WSOP hand histories.
+- **Scale:** a screening run is 64 opponents x 20 duplicate pairs = 2,560 matches (~75 hands each, ~190,000 hands)
+  in about 4 minutes on 15 CPU cores. An acceptance gate is ~13,000 matches; a tournament simulation (40 bots,
+  round robin + knockout, 4 tournaments) is ~6,300 matches. Over 128,000 matches in total.
 - **Sandbox fidelity:** we verified that our fast in-process lab and the real Docker sandbox make identical
   decisions, decision for decision, on fixed seeds.
 - Full log of every hypothesis, result and decision (including rejected ideas): `lab/EXPERIMENTS.md`.

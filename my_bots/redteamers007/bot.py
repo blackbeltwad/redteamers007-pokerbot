@@ -60,6 +60,19 @@ CARD = {r + s: eval7.Card(r + s) for r in RANKS for s in SUITS}
 
 PF_BB = 13.0            # push/fold at or below this effective stack (bb)
 
+# Tunables (lab A/B tests call configure(); the tournament never does)
+TUNE = {"bluff_prior": 0.25, "real_flop": (0.85, 0.92), "real_turn": (0.90, 0.95)}
+
+
+def configure(params):
+    for k, v in params.items():
+        if k in ("real_flop", "real_turn"):
+            continue
+        TUNE[k] = v
+    if "rf" in params:
+        TUNE["real_flop"] = (params["rf"], min(1.0, params["rf"] + 0.07))
+        TUNE["real_turn"] = (min(1.0, params["rf"] + 0.05), min(1.0, params["rf"] + 0.1))
+
 # ------------------------------------------------------------------ opponent model
 OPP = {}                # module state: lasts one match
 _seen_hands = set()
@@ -424,7 +437,7 @@ def postflop(gs, ctx):
     rvb = rate("raise_vs_bet", 0.12, 10)
     ftb_ = rate("fold_to_bet", 0.45, 10)
     # bluff share of opp bets, calibrated from showdowns (shrunk to a 15% prior)
-    b = min(0.6, rate("bet_bluff", 0.15, 8))
+    b = min(0.6, rate("bet_bluff", TUNE["bluff_prior"], 8))
     streets = ["flop", "turn", "river"]
     n_board = {"flop": 3, "turn": 4, "river": 5}
     narrowed = []
@@ -491,7 +504,8 @@ def postflop(gs, ctx):
         return raise_to(gs, gs["current_bet"] * 2.5 + (pot - owed) * 0.3)
     # equity realisation: before the river we still face future bets (worse out of position)
     oop = gs["seat_to_act"] == gs["bb_seat"]
-    real = 1.0 if street == "river" else ((0.85 if oop else 0.92) if street == "flop" else (0.9 if oop else 0.95))
+    rf, rt = TUNE["real_flop"], TUNE["real_turn"]
+    real = 1.0 if street == "river" else ((rf[0] if oop else rf[1]) if street == "flop" else (rt[0] if oop else rt[1]))
     dbg["real"] = real
     if eq * real >= need:
         dbg["line"] = "call"

@@ -1,0 +1,22 @@
+{
+ "label": "ds_v1",
+ "hero": "lab/snapshots/v1",
+ "opps": "dataset",
+ "pairs": 100,
+ "seeds": "holdout",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "snap:v1",
+  "--opps",
+  "dataset",
+  "--pairs",
+  "100",
+  "--seeds",
+  "holdout",
+  "--label",
+  "ds_v1"
+ ]
+}

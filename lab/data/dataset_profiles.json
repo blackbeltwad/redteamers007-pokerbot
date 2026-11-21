@@ -1,0 +1,343 @@
+{
+ "source": "lab/datasets/phh-dataset/data",
+ "files": 10088,
+ "hu_scale": 2.3,
+ "profiles": {
+  "MrPink": {
+   "hands": 6055,
+   "raw": {
+    "vpip6": 0.263,
+    "pfr6": 0.174,
+    "3b": 0.092,
+    "ftb": 0.513,
+    "bwc": 0.331,
+    "af": 3.03
+   },
+   "params": {
+    "vpip": 0.604,
+    "pfr": 0.4,
+    "threebet": 0.185,
+    "call_margin": -0.05,
+    "bluff": 0.131,
+    "bet_eq": 0.734,
+    "raise_eq": 0.779,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Bill": {
+   "hands": 6713,
+   "raw": {
+    "vpip6": 0.275,
+    "pfr6": 0.199,
+    "3b": 0.106,
+    "ftb": 0.451,
+    "bwc": 0.335,
+    "af": 2.12
+   },
+   "params": {
+    "vpip": 0.631,
+    "pfr": 0.458,
+    "threebet": 0.213,
+    "call_margin": -0.0,
+    "bluff": 0.135,
+    "bet_eq": 0.733,
+    "raise_eq": 0.824,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Eddie": {
+   "hands": 5510,
+   "raw": {
+    "vpip6": 0.272,
+    "pfr6": 0.176,
+    "3b": 0.062,
+    "ftb": 0.504,
+    "bwc": 0.32,
+    "af": 2.96
+   },
+   "params": {
+    "vpip": 0.627,
+    "pfr": 0.405,
+    "threebet": 0.125,
+    "call_margin": -0.044,
+    "bluff": 0.12,
+    "bet_eq": 0.74,
+    "raise_eq": 0.782,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Joe": {
+   "hands": 1535,
+   "raw": {
+    "vpip6": 0.225,
+    "pfr6": 0.174,
+    "3b": 0.093,
+    "ftb": 0.458,
+    "bwc": 0.335,
+    "af": 2.48
+   },
+   "params": {
+    "vpip": 0.518,
+    "pfr": 0.4,
+    "threebet": 0.186,
+    "call_margin": -0.006,
+    "bluff": 0.135,
+    "bet_eq": 0.733,
+    "raise_eq": 0.806,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Pluribus": {
+   "hands": 10000,
+   "raw": {
+    "vpip6": 0.264,
+    "pfr6": 0.177,
+    "3b": 0.073,
+    "ftb": 0.479,
+    "bwc": 0.308,
+    "af": 2.33
+   },
+   "params": {
+    "vpip": 0.607,
+    "pfr": 0.406,
+    "threebet": 0.145,
+    "call_margin": -0.023,
+    "bluff": 0.108,
+    "bet_eq": 0.746,
+    "raise_eq": 0.814,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "MrBlue": {
+   "hands": 9121,
+   "raw": {
+    "vpip6": 0.314,
+    "pfr6": 0.188,
+    "3b": 0.059,
+    "ftb": 0.546,
+    "bwc": 0.263,
+    "af": 1.93
+   },
+   "params": {
+    "vpip": 0.722,
+    "pfr": 0.433,
+    "threebet": 0.118,
+    "call_margin": -0.077,
+    "bluff": 0.063,
+    "bet_eq": 0.768,
+    "raise_eq": 0.834,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "MrWhite": {
+   "hands": 4483,
+   "raw": {
+    "vpip6": 0.259,
+    "pfr6": 0.17,
+    "3b": 0.07,
+    "ftb": 0.563,
+    "bwc": 0.267,
+    "af": 1.91
+   },
+   "params": {
+    "vpip": 0.597,
+    "pfr": 0.392,
+    "threebet": 0.14,
+    "call_margin": -0.09,
+    "bluff": 0.067,
+    "bet_eq": 0.766,
+    "raise_eq": 0.835,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "MrOrange": {
+   "hands": 7512,
+   "raw": {
+    "vpip6": 0.208,
+    "pfr6": 0.143,
+    "3b": 0.074,
+    "ftb": 0.535,
+    "bwc": 0.272,
+    "af": 1.99
+   },
+   "params": {
+    "vpip": 0.478,
+    "pfr": 0.329,
+    "threebet": 0.148,
+    "call_margin": -0.068,
+    "bluff": 0.072,
+    "bet_eq": 0.764,
+    "raise_eq": 0.831,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Budd": {
+   "hands": 2509,
+   "raw": {
+    "vpip6": 0.251,
+    "pfr6": 0.181,
+    "3b": 0.085,
+    "ftb": 0.533,
+    "bwc": 0.326,
+    "af": 2.83
+   },
+   "params": {
+    "vpip": 0.578,
+    "pfr": 0.416,
+    "threebet": 0.17,
+    "call_margin": -0.067,
+    "bluff": 0.126,
+    "bet_eq": 0.737,
+    "raise_eq": 0.789,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "MrBlonde": {
+   "hands": 2560,
+   "raw": {
+    "vpip6": 0.226,
+    "pfr6": 0.169,
+    "3b": 0.098,
+    "ftb": 0.535,
+    "bwc": 0.245,
+    "af": 1.69
+   },
+   "params": {
+    "vpip": 0.519,
+    "pfr": 0.388,
+    "threebet": 0.197,
+    "call_margin": -0.068,
+    "bluff": 0.045,
+    "bet_eq": 0.777,
+    "raise_eq": 0.846,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "MrBrown": {
+   "hands": 1378,
+   "raw": {
+    "vpip6": 0.254,
+    "pfr6": 0.155,
+    "3b": 0.089,
+    "ftb": 0.45,
+    "bwc": 0.281,
+    "af": 1.77
+   },
+   "params": {
+    "vpip": 0.584,
+    "pfr": 0.356,
+    "threebet": 0.179,
+    "call_margin": -0.0,
+    "bluff": 0.081,
+    "bet_eq": 0.76,
+    "raise_eq": 0.841,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Gogo": {
+   "hands": 488,
+   "raw": {
+    "vpip6": 0.318,
+    "pfr6": 0.227,
+    "3b": 0.11,
+    "ftb": 0.429,
+    "bwc": 0.341,
+    "af": 2.02
+   },
+   "params": {
+    "vpip": 0.731,
+    "pfr": 0.523,
+    "threebet": 0.22,
+    "call_margin": 0.017,
+    "bluff": 0.141,
+    "bet_eq": 0.73,
+    "raise_eq": 0.829,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "Hattori": {
+   "hands": 1365,
+   "raw": {
+    "vpip6": 0.264,
+    "pfr6": 0.18,
+    "3b": 0.058,
+    "ftb": 0.473,
+    "bwc": 0.276,
+    "af": 1.93
+   },
+   "params": {
+    "vpip": 0.607,
+    "pfr": 0.415,
+    "threebet": 0.115,
+    "call_margin": -0.019,
+    "bluff": 0.076,
+    "bet_eq": 0.762,
+    "raise_eq": 0.833,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  },
+  "ORen": {
+   "hands": 771,
+   "raw": {
+    "vpip6": 0.266,
+    "pfr6": 0.163,
+    "3b": 0.075,
+    "ftb": 0.61,
+    "bwc": 0.359,
+    "af": 4.8
+   },
+   "params": {
+    "vpip": 0.612,
+    "pfr": 0.376,
+    "threebet": 0.15,
+    "call_margin": -0.128,
+    "bluff": 0.159,
+    "bet_eq": 0.721,
+    "raise_eq": 0.69,
+    "size": 0.66,
+    "pf_size": 2.5,
+    "shove_bb": 8,
+    "shove_range": 0.45
+   }
+  }
+ }
+}

@@ -288,6 +288,8 @@ def aggregate(matches):
                "think_mean": ratio(hero_all, "think_sum", "decisions"),
                "think_p99_worst_match": think_p99[-1] if think_p99 else 0,
                "think_p99_median_match": think_p99[len(think_p99) // 2] if think_p99 else 0,
+               "think_p99_q99_match": think_p99[int(len(think_p99) * 0.99)] if think_p99 else 0,
+               "matches_p99_over_600": sum(x > 600 for x in think_p99),
                "crashes": len(crashes)}
     return {"overall": overall, "hero_counters": overall_counters, "by_opp": rows, "side": side, "crash_samples": [c["crash"] for c in crashes[:3]]}
 

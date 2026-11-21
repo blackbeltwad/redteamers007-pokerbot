@@ -53,3 +53,11 @@ for replay (doesn't alter any win-rate numbers).
 Dataset set (holdout, 100 pairs x 14): v1 70.1% [68.3,71.7] | v2 71.0% with 2 timeouts (both pair 2 = first matches of run,
 replay 6-8ms) -> added warmup that exercises preflop+postflop paths then wipes state -> v2 71.2% [69.5,72.9], 0 timeouts.
 Decision: ACCEPT v2 (small but consistent gain; mainly less exploitable: FtbF/T/R 63/70/73 -> 57/63/66).
+
+## Docker sandbox fidelity (2026-11-21) + v2.1
+Docker Desktop installed; `make sandbox` built fullhouse-sandbox. Real sandbox (0.5 CPU): our think mean 2.3ms, p99 <= 31ms, 0 errors.
+Fidelity script (scratch) replays play.py --docker seeds in-process with identical names/seeds and compares every decision.
+Found: eval7's C RNG is clock-seeded at import -> MC equity not reproducible (fast path diverged from docker mid-match on
+3/4 seeds, at threshold decisions). Fix: `eval7.xorshift_rand.seed(random.getrandbits(62))` per decision (from the
+sandbox-seeded `random`). After: fast path == docker decision-for-decision on 5/5 seeds.
+Screen (dev, all 64 opps, 20 pairs): v2 75.1% | v2.1 76.2% (neutral, as expected). validate OK. -> ACCEPT as v2.1 (tag v2.1).

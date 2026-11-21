@@ -60,6 +60,19 @@ CARD = {r + s: eval7.Card(r + s) for r in RANKS for s in SUITS}
 
 PF_BB = 13.0            # push/fold at or below this effective stack (bb)
 
+# Tunables (lab A/B tests call configure(); the tournament never does)
+TUNE = {"bluff_prior": 0.25, "real_flop": (0.85, 0.92), "real_turn": (0.90, 0.95)}
+
+
+def configure(params):
+    for k, v in params.items():
+        if k in ("real_flop", "real_turn"):
+            continue
+        TUNE[k] = v
+    if "rf" in params:
+        TUNE["real_flop"] = (params["rf"], min(1.0, params["rf"] + 0.07))
+        TUNE["real_turn"] = (min(1.0, params["rf"] + 0.05), min(1.0, params["rf"] + 0.1))
+
 # ------------------------------------------------------------------ opponent model
 OPP = {}                # module state: lasts one match
 _seen_hands = set()
@@ -424,7 +437,7 @@ def postflop(gs, ctx):
     rvb = rate("raise_vs_bet", 0.12, 10)
     ftb_ = rate("fold_to_bet", 0.45, 10)
     # bluff share of opp bets, calibrated from showdowns (shrunk to a 15% prior)
-    b = min(0.6, rate("bet_bluff", 0.15, 8))
+    b = min(0.6, rate("bet_bluff", TUNE["bluff_prior"], 8))
     streets = ["flop", "turn", "river"]
     n_board = {"flop": 3, "turn": 4, "river": 5}
     narrowed = []
@@ -491,7 +504,8 @@ def postflop(gs, ctx):
         return raise_to(gs, gs["current_bet"] * 2.5 + (pot - owed) * 0.3)
     # equity realisation: before the river we still face future bets (worse out of position)
     oop = gs["seat_to_act"] == gs["bb_seat"]
-    real = 1.0 if street == "river" else ((0.85 if oop else 0.92) if street == "flop" else (0.9 if oop else 0.95))
+    rf, rt = TUNE["real_flop"], TUNE["real_turn"]
+    real = 1.0 if street == "river" else ((rf[0] if oop else rf[1]) if street == "flop" else (rt[0] if oop else rt[1]))
     dbg["real"] = real
     if eq * real >= need:
         dbg["line"] = "call"
@@ -511,11 +525,37 @@ def bet(gs, amount):
 # ------------------------------------------------------------------ entry point
 def decide(gs):
     if gs.get("type") == "warmup":
+        _warmup()
         return {"action": "check"}
     try:
         return _decide(gs)
     except Exception as e:  # never raise: fall back to check/fold
         return dict(passive(gs), debug={"err": repr(e)[:200]})
+
+
+def _warmup():
+    """Exercise the hot paths once (imports, eval7, numpy) during the long warmup deadline,
+    then wipe all match state so the dummy hands leave no trace."""
+    try:
+        base = {"your_bot_id": "me", "hand_num": 0, "blinds": {"sb": 25, "bb": 50, "ante": 0},
+                "players": [{"seat": 0, "bot_id": "me", "stack": 9900, "bet_this_street": 0},
+                            {"seat": 1, "bot_id": "op", "stack": 9900, "bet_this_street": 0}],
+                "seat_to_act": 0, "sb_seat": 1, "bb_seat": 0, "button_seat": 1,
+                "your_cards": ["As", "Kd"], "your_stack": 9900, "your_bet_this_street": 0,
+                "match_action_log": []}
+        pre = dict(base, street="preflop", community_cards=[], pot=150, amount_owed=50, can_check=False,
+                   current_bet=100, min_raise_to=150,
+                   action_log=[{"seat": 1, "bot_id": "op", "action": "raise", "amount": 100, "street": "preflop"}])
+        _decide(pre)
+        post = dict(base, street="turn", community_cards=["Ah", "7c", "2d", "9s"], pot=400, amount_owed=200,
+                    can_check=False, current_bet=200, min_raise_to=400,
+                    action_log=[{"seat": 1, "bot_id": "op", "action": "raise", "amount": 200, "street": "turn"}])
+        _decide(post)
+    except Exception:
+        pass
+    _reset_model()
+    _seen_hands.clear()
+    BOARDS.clear()
 
 
 def _decide(gs):

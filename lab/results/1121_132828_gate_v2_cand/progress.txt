@@ -1,1 +1,1 @@
-2241/10000 matches  180s  eta 623s
+10000/10000 matches  758s  eta 0s

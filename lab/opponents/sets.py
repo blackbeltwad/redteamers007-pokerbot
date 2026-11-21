@@ -47,6 +47,13 @@ def resolve_opps(s):
         elif tok == "ext":
             # public Fullhouse 2026 bots (same engine/API), pinned in lab/EXPERIMENTS.md
             out += [(f"e_{k}", v) for k, v in EXT.items()]
+        elif tok == "dataset":
+            # sparring bots fitted to real players (lab/tools/phh_stats.py -> lab/data/dataset_profiles.json)
+            import json
+            prof = json.loads((ROOT / "lab/data/dataset_profiles.json").read_text())["profiles"]
+            for name, v in prof.items():
+                q = ",".join(f"{k}={v}" for k, v in v["params"].items())
+                out.append((f"d_{name}", f"{ARCH}::{q}"))
         elif tok == "exploit":
             for p in sorted((ROOT / "lab/opponents/exploiters").glob("*.py")):
                 if p.name != "__init__.py":

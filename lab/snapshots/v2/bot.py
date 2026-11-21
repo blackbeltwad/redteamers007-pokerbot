@@ -525,11 +525,37 @@ def bet(gs, amount):
 # ------------------------------------------------------------------ entry point
 def decide(gs):
     if gs.get("type") == "warmup":
+        _warmup()
         return {"action": "check"}
     try:
         return _decide(gs)
     except Exception as e:  # never raise: fall back to check/fold
         return dict(passive(gs), debug={"err": repr(e)[:200]})
+
+
+def _warmup():
+    """Exercise the hot paths once (imports, eval7, numpy) during the long warmup deadline,
+    then wipe all match state so the dummy hands leave no trace."""
+    try:
+        base = {"your_bot_id": "me", "hand_num": 0, "blinds": {"sb": 25, "bb": 50, "ante": 0},
+                "players": [{"seat": 0, "bot_id": "me", "stack": 9900, "bet_this_street": 0},
+                            {"seat": 1, "bot_id": "op", "stack": 9900, "bet_this_street": 0}],
+                "seat_to_act": 0, "sb_seat": 1, "bb_seat": 0, "button_seat": 1,
+                "your_cards": ["As", "Kd"], "your_stack": 9900, "your_bet_this_street": 0,
+                "match_action_log": []}
+        pre = dict(base, street="preflop", community_cards=[], pot=150, amount_owed=50, can_check=False,
+                   current_bet=100, min_raise_to=150,
+                   action_log=[{"seat": 1, "bot_id": "op", "action": "raise", "amount": 100, "street": "preflop"}])
+        _decide(pre)
+        post = dict(base, street="turn", community_cards=["Ah", "7c", "2d", "9s"], pot=400, amount_owed=200,
+                    can_check=False, current_bet=200, min_raise_to=400,
+                    action_log=[{"seat": 1, "bot_id": "op", "action": "raise", "amount": 200, "street": "turn"}])
+        _decide(post)
+    except Exception:
+        pass
+    _reset_model()
+    _seen_hands.clear()
+    BOARDS.clear()
 
 
 def _decide(gs):

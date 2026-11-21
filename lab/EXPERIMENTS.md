@@ -36,3 +36,19 @@ Leak: postflop over-folding (FtbF/T/R 70/79/85 vs ext).
 Added TUNE dict + configure() hook (lab-only A/B; sandbox never calls it).
 base(bluff_prior .15) 75.0 | A(.25) 76.1 | A35(.35) 75.4 | B(realisation .93) 75.3 | A+B 75.3  -- all within noise.
 A lowers FtbF/T/R 63/70/73 -> 57/63/66 (less exploitable), core +2, rand +2, ext flat. Chose A -> v2 candidate.
+
+## Dataset bots (2026-11-21)
+phh-dataset (uoftcprg, MIT) @e47fbd5, sparse: data/pluribus (10,000 Pluribus 6-max hands) + data/wsop, in gitignored
+lab/datasets/. `python -m lab.tools.phh_stats <dir>` streams hands -> per-player stats -> lab/data/dataset_profiles.json
+(14 players >= 300 hands: Pluribus + 13 pros). Set `dataset` = one archetype bot per player. Preflop freqs widened x2.3
+for heads-up (an approximation); postflop fold-to-bet / bet-when-checked / AF used as measured.
+The same parser works on the full 20 GB Zenodo archive (incl. ACPC heads-up hands) when unzipped.
+
+## v2 = v1 + bluff_prior 0.25 (H2) + warmup hardening
+Gate (holdout, core+rand20+exploit+ext, 100 pairs; h2h 200): h2h 52.0% [47.1,56.9] (35-138-27); set 76.6 vs 75.5; no regressions.
+Formally FAILED only on old worst-match timing rule: 1/10000 matches p99 686ms; quiet replay of that match = 5ms, same winner
+-> machine contention. LAB CHANGE: timing rule now = 99th pct over matches of per-match p99 <= 600ms, outliers listed
+for replay (doesn't alter any win-rate numbers).
+Dataset set (holdout, 100 pairs x 14): v1 70.1% [68.3,71.7] | v2 71.0% with 2 timeouts (both pair 2 = first matches of run,
+replay 6-8ms) -> added warmup that exercises preflop+postflop paths then wipes state -> v2 71.2% [69.5,72.9], 0 timeouts.
+Decision: ACCEPT v2 (small but consistent gain; mainly less exploitable: FtbF/T/R 63/70/73 -> 57/63/66).

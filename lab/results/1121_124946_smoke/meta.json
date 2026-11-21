@@ -1,0 +1,20 @@
+{
+ "label": "smoke",
+ "hero": "lab/opponents/archetype.py::preset=tag",
+ "opps": "core",
+ "pairs": 4,
+ "seeds": "dev",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "lab/opponents/archetype.py::preset=tag",
+  "--opps",
+  "core",
+  "--pairs",
+  "4",
+  "--label",
+  "smoke"
+ ]
+}

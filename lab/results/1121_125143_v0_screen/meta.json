@@ -1,0 +1,20 @@
+{
+ "label": "v0_screen",
+ "hero": "my_bots/redteamers007",
+ "opps": "core",
+ "pairs": 10,
+ "seeds": "dev",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "my_bots/redteamers007",
+  "--opps",
+  "core",
+  "--pairs",
+  "10",
+  "--label",
+  "v0_screen"
+ ]
+}

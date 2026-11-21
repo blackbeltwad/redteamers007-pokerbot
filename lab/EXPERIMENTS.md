@@ -2,7 +2,8 @@
 
 Setup: Python 3.10 venv at .venv (`source .venv/bin/activate`). Lab = `python -m lab.run`, gate = `python -m lab.gate`.
 Seeds: `dev` for development/screening, `holdout` only for gate decisions. Pair = same seed, seats swapped, standard blinds, freezeout.
-Time factor tf=2.0 (local ms x2 ~ half-core). Opp sets: `core` (10 archetypes + kit bots), `randN`, `exploit`, `snap:<v>`.
+Time factor tf=2.0 (local ms x2 ~ half-core). Opp sets: `core`, `randN`, `exploit`, `ext`, `dataset`, `snap:<v>` (see COLLAB.md).
+**Current best: v2 (tag v2, on main).** Next leaks: over-folding to 3-bets (gunslinger), late push/fold check.
 Snapshots: `lab/snapshot.sh vN` -> lab/snapshots/vN (git-tagged when accepted).
 
 ## Lab sanity (2026-11-21)

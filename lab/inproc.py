@@ -60,9 +60,20 @@ def load_module(spec: str):
     path, params = parse_spec(spec)
     _load_counter += 1
     os.environ["BOT_DATA_DIR"] = str(path.parent / "data")
-    mspec = importlib.util.spec_from_file_location(f"bot_{_load_counter}", str(path))
-    module = importlib.util.module_from_spec(mspec)
-    mspec.loader.exec_module(module)
+    bdir = str(path.parent)
+    before = set(sys.modules)
+    sys.path.insert(0, bdir)
+    try:
+        mspec = importlib.util.spec_from_file_location(f"bot_{_load_counter}", str(path))
+        module = importlib.util.module_from_spec(mspec)
+        mspec.loader.exec_module(module)
+    finally:
+        sys.path.remove(bdir)
+        # evict sibling modules the bot imported, so other bots / later matches load fresh copies
+        for name in set(sys.modules) - before:
+            f = getattr(sys.modules[name], "__file__", None) or ""
+            if f.startswith(bdir):
+                del sys.modules[name]
     if params and hasattr(module, "configure"):
         module.configure(params)
     return module

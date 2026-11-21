@@ -1,0 +1,18 @@
+{
+ "label": "gate_v1_h2h",
+ "hero": "lab/snapshots/v1",
+ "opps": "best=lab/snapshots/v0",
+ "pairs": 200,
+ "seeds": "holdout",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/gate.py",
+  "--cand",
+  "snap:v1",
+  "--best",
+  "snap:v0",
+  "--tag",
+  "gate_v1"
+ ]
+}

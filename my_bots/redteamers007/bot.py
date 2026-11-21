@@ -63,6 +63,7 @@ PF_BB = 13.0            # push/fold at or below this effective stack (bb)
 # ------------------------------------------------------------------ opponent model
 OPP = {}                # module state: lasts one match
 _seen_hands = set()
+BOARDS = {}             # hand_num -> last board we saw (match_action_log has no board)
 
 
 def _reset_model():
@@ -73,7 +74,7 @@ def _reset_model():
         "bb_fold_open": [0, 0], "bb_3bet": [0, 0], "bb_call_shove": [0, 0],
         "fold_to_3bet": [0, 0],
         "fold_to_bet": [0, 0], "bet_when_checked": [0, 0], "raise_vs_bet": [0, 0],
-        "sd_bluffs": [0, 0],    # showdowns after opp river aggression where opp held weak
+        "bet_bluff": [0, 0],    # opp postflop bets later shown down: (weak at the time, total)
         "hands": 0,
     })
 
@@ -140,6 +141,18 @@ def _digest_hand(es, me):
                     OPP["fold_to_3bet"][1] += 1
                     OPP["fold_to_3bet"][0] += resp["action"] == "fold"
                 break
+    # showdown calibration: were the opponent's postflop bets made with weak hands?
+    shown = next((e.get("cards") for e in es if e["action"] == "show" and e["bot_id"] != me), None)
+    hn = es[0].get("hand_num")
+    board = BOARDS.get(hn) or []
+    if shown and len(board) >= 3:
+        nb = {"flop": 3, "turn": 4, "river": 5}
+        for st in ("flop", "turn", "river"):
+            if len(board) < nb[st]:
+                break
+            if any(e["street"] == st and e["bot_id"] != me and e["action"] in ("raise", "all_in") for e in acts):
+                OPP["bet_bluff"][1] += 1
+                OPP["bet_bluff"][0] += _strength_pct(shown, board[:nb[st]]) < 0.5
     # postflop: opp response to our bets, opp betting when checked to
     for st in ("flop", "turn", "river"):
         sa = [e for e in acts if e["street"] == st]
@@ -236,8 +249,10 @@ def preflop(gs, ctx):
             rng = top_range(max(freq, 0.04))
         eq = eq_vs_range(ci, rng)
         need = owed / (pot + owed)
-        dbg.update(line="vs_allin", eq=round(eq, 3), need=round(need, 3), opp_rng=round(freq, 3))
-        if eq >= need:
+        # with a skill edge, avoid coin-flips for deep stacks (freezeout: survival matters)
+        margin = float(np.clip((S - 20) / 80, 0, 1)) * 0.08
+        dbg.update(line="vs_allin", eq=round(eq, 3), need=round(need, 3), margin=round(margin, 3), opp_rng=round(freq, 3))
+        if eq >= need + margin:
             return {"action": "call"} if opp_all_in or owed >= gs["your_stack"] else {"action": "all_in"}
         return {"action": "fold"}
 
@@ -278,7 +293,10 @@ def preflop(gs, ctx):
         fold_open = rate("bb_fold_open", 0.35, 12)
         three = rate("bb_3bet", 0.12, 12)
         width = 0.78 + 0.4 * (fold_open - 0.35) - 0.5 * (three - 0.12)
-        width = float(np.clip(width, 0.5, 1.0))
+        if three > 0.3:
+            # opponent re-raises a lot: only open what we'd continue with vs its re-raise range
+            width = min(width, max(0.12, 0.7 - three))
+        width = float(np.clip(width, 0.12, 1.0))
         dbg.update(line="open", width=round(width, 2))
         if PCT_MID[ci] < width:
             size = 2.5 if S > 30 else 2.2
@@ -361,23 +379,36 @@ def build_combos(cls_w, dead):
     return out
 
 
-def narrow(combos, board, aggressive, sticky):
-    """Reweight villain combos by their made-hand strength on `board`.
-    aggressive=True (villain bet/raised): weak hands kept with prob `sticky` (bluffs).
-    aggressive=False (villain called): very weak hands mostly gone, draws/medium stay."""
+def _strength_pct(cards, board):
+    """Fraction of random villain combos that `cards` beat on `board` (made hand only)."""
+    bc = [CARD[c] for c in board]
+    mine = eval7.evaluate([CARD[c] for c in cards] + bc)
+    dead = set(board) | set(cards)
+    deck = [c for c in CARD if c not in dead]
+    win = tot = 0
+    for i in range(len(deck)):
+        for j in range(i + 1, len(deck), 3):     # subsample for speed
+            v = eval7.evaluate([CARD[deck[i]], CARD[deck[j]]] + bc)
+            win += (mine > v) + 0.5 * (mine == v)
+            tot += 1
+    return win / max(1, tot)
+
+
+def narrow(combos, board, keep, floor):
+    """Keep villain's top `keep` fraction of (weighted) combos by made-hand strength
+    on `board`; weaker combos keep weight `floor` (bluffs / draws). Soft edge."""
     bcards = [CARD[c] for c in board]
     vals = [eval7.evaluate([CARD[a], CARD[b]] + bcards) for a, b, _ in combos]
-    order = sorted(range(len(vals)), key=lambda i: vals[i])
+    order = sorted(range(len(vals)), key=lambda i: -vals[i])   # strongest first
     tot = sum(c[2] for c in combos) or 1.0
+    keep = min(1.0, max(0.03, keep))
+    soft = 0.08
     acc = 0.0
-    for i in order:                       # weakest first
-        pct = (acc + combos[i][2] / 2) / tot   # 0 weakest .. 1 strongest
+    for i in order:
+        pos = (acc + combos[i][2] / 2) / tot     # 0 strongest .. 1 weakest
         acc += combos[i][2]
-        if aggressive:
-            f = sticky + (1 - sticky) * min(1.0, pct / 0.6) ** 1.5
-        else:
-            f = 0.25 + 0.75 * min(1.0, pct / 0.35)
-        combos[i][2] *= f
+        f = min(1.0, max(0.0, (keep + soft / 2 - pos) / soft))
+        combos[i][2] *= floor + (1 - floor) * f
     return combos
 
 
@@ -388,28 +419,48 @@ def postflop(gs, ctx):
     hole = gs["your_cards"]
     dead = set(board) | set(hole)
     combos = build_combos(opp_preflop_range(gs, me), dead)
-    # opponent bluff frequency estimate: how often they bet when checked to (higher = looser)
-    bwc = rate("bet_when_checked", 0.4, 10)
-    sticky = float(np.clip(0.15 + 0.6 * (bwc - 0.3), 0.08, 0.6))
+    # range narrowing by the opponent's measured action frequencies (shrunk to priors)
+    bwc = rate("bet_when_checked", 0.40, 10)
+    rvb = rate("raise_vs_bet", 0.12, 10)
+    ftb_ = rate("fold_to_bet", 0.45, 10)
+    # bluff share of opp bets, calibrated from showdowns (shrunk to a 15% prior)
+    b = min(0.6, rate("bet_bluff", 0.15, 8))
     streets = ["flop", "turn", "river"]
     n_board = {"flop": 3, "turn": 4, "river": 5}
+    narrowed = []
     for st in streets[:streets.index(gs["street"]) + 1]:
-        sa = [a for a in gs["action_log"] if a["street"] == st and a["bot_id"] != me
-              and a["action"] in ("raise", "all_in", "call")]
-        if not sa:
-            continue
-        aggressive = any(a["action"] in ("raise", "all_in") for a in sa)
-        combos = narrow(combos, board[:n_board[st]], aggressive, sticky)
+        sa = [a for a in gs["action_log"] if a["street"] == st and a["action"] in ("raise", "all_in", "call", "check", "fold")]
+        keep = None
+        for i, a in enumerate(sa):
+            if a["bot_id"] == me:
+                continue
+            prev_aggr = any(x["action"] in ("raise", "all_in") for x in sa[:i])
+            if a["action"] in ("raise", "all_in"):
+                k = rvb if prev_aggr else bwc
+                keep = k if keep is None else keep * max(k, 0.3)
+            elif a["action"] == "call" and prev_aggr:
+                k = 1 - ftb_
+                keep = k if keep is None else keep * k
+        if keep is not None:
+            k = min(0.97, keep)
+            floor = float(np.clip(b * k / ((1 - b) * (1 - k)), 0.02, 1.0))
+            combos = narrow(combos, board[:n_board[st]], keep, floor)
+            narrowed.append(round(keep, 2))
     if not combos:
         combos = build_combos(np.ones(169), dead)
-    rng = [((CARD[a], CARD[b]), w) for a, b, w in combos if w > 1e-3]
+    # eval7's Monte Carlo ignores range weights, so sample combos by weight (with replacement)
+    ws = np.array([c[2] for c in combos], dtype=float)
+    ws = ws / ws.sum()
+    idx = np.random.choice(len(combos), size=400, p=ws)
+    rng = [((CARD[combos[i][0]], CARD[combos[i][1]]), 1.0) for i in idx]
+    n_eff = float(1.0 / (ws ** 2).sum())
     iters = 2500 if gs["street"] != "river" else 1500
     eq = eval7.py_hand_vs_range_monte_carlo([CARD[c] for c in hole], rng, [CARD[c] for c in board], iters)
     owed, pot = gs["amount_owed"], gs["pot"]
     stack = gs["your_stack"]
     street = gs["street"]
     ftb = rate("fold_to_bet", 0.45, 10)
-    dbg.update(eq=round(eq, 3), n_rng=len(rng), sticky=round(sticky, 2), ftb=round(ftb, 2))
+    dbg.update(bluff_b=round(b, 2), eq=round(eq, 3), n_eff=round(n_eff), keep=narrowed, ftb=round(ftb, 2))
     spr = stack / max(1, pot)
 
     if owed == 0:
@@ -438,7 +489,11 @@ def postflop(gs, ctx):
         if spr < 2.5 or owed > 0.35 * stack:
             return {"action": "all_in"}
         return raise_to(gs, gs["current_bet"] * 2.5 + (pot - owed) * 0.3)
-    if eq >= need:
+    # equity realisation: before the river we still face future bets (worse out of position)
+    oop = gs["seat_to_act"] == gs["bb_seat"]
+    real = 1.0 if street == "river" else ((0.85 if oop else 0.92) if street == "flop" else (0.9 if oop else 0.95))
+    dbg["real"] = real
+    if eq * real >= need:
         dbg["line"] = "call"
         return {"action": "call"}
     dbg["line"] = "fold"
@@ -467,6 +522,8 @@ def _decide(gs):
     me = gs["your_bot_id"]
     if gs["hand_num"] == 0 and not _seen_hands and OPP["hands"] == 0:
         pass
+    if gs["community_cards"]:
+        BOARDS[gs["hand_num"]] = list(gs["community_cards"])
     _update_model(gs, me)
     bb = gs["blinds"]["bb"]
     opp = next(p for p in gs["players"] if p["bot_id"] != me)

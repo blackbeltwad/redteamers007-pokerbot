@@ -1,0 +1,71 @@
+{
+ "meta": {
+  "label": "ext_smoke",
+  "hero": "snap:v1",
+  "opps": "ext",
+  "pairs": 1,
+  "seeds": "dev",
+  "start": 0,
+  "tf": 2.0,
+  "argv": [
+   "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+   "--hero",
+   "snap:v1",
+   "--opps",
+   "ext",
+   "--pairs",
+   "1",
+   "--workers",
+   "2",
+   "--label",
+   "ext_smoke"
+  ]
+ },
+ "overall": {
+  "W": 0,
+  "N": 0,
+  "WW": 0,
+  "D": 0,
+  "LL": 0,
+  "winrate": 0,
+  "lo": 0,
+  "hi": 1,
+  "hero": {
+   "VPIP": NaN,
+   "PFR": NaN,
+   "3B": NaN,
+   "F3B": NaN,
+   "CB": NaN,
+   "FtbF": NaN,
+   "FtbT": NaN,
+   "FtbR": NaN,
+   "AF": NaN,
+   "WTSD": NaN,
+   "SDW": NaN,
+   "AI/100": NaN,
+   "bb/100": NaN
+  },
+  "timeouts": 0,
+  "errors": 0,
+  "think_mean": NaN,
+  "think_p99_worst_match": 0,
+  "think_p99_median_match": 0,
+  "crashes": 28
+ },
+ "hero_counters": {},
+ "by_opp": {},
+ "side": {
+  "bluff_chips": 0,
+  "hands": 0,
+  "72_won": 0,
+  "72_dealt": 0,
+  "min_sd_val": null,
+  "min_sd_hand": null,
+  "best_comeback": null
+ },
+ "crash_samples": [
+  "Traceback (most recent call last):\n  File \"/Users/wad/src/poker-hackathon-kit/lab/run.py\", line 187, in play_one\n    res = play_match(seats, cfg, f\"p{pair}{'b' if swap else 'a'}\", rec)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 346, in play_match\n    warm = warm_up(seats)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 313, in warm_up\n    s.start()\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 115, in start\n    self.module = load_module(self.spec)\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 68, in load_module\n    module = importlib.util.module_from_spec(mspec)\n  File \"<frozen importlib._bootstrap>\", line 568, in module_from_spec\nAttributeError: 'NoneType' object has no attribute 'loader'\n",
+  "Traceback (most recent call last):\n  File \"/Users/wad/src/poker-hackathon-kit/lab/run.py\", line 187, in play_one\n    res = play_match(seats, cfg, f\"p{pair}{'b' if swap else 'a'}\", rec)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 346, in play_match\n    warm = warm_up(seats)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 313, in warm_up\n    s.start()\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 115, in start\n    self.module = load_module(self.spec)\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 68, in load_module\n    module = importlib.util.module_from_spec(mspec)\n  File \"<frozen importlib._bootstrap>\", line 568, in module_from_spec\nAttributeError: 'NoneType' object has no attribute 'loader'\n",
+  "Traceback (most recent call last):\n  File \"/Users/wad/src/poker-hackathon-kit/lab/run.py\", line 187, in play_one\n    res = play_match(seats, cfg, f\"p{pair}{'b' if swap else 'a'}\", rec)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 346, in play_match\n    warm = warm_up(seats)\n  File \"/Users/wad/src/poker-hackathon-kit/pokercore/table.py\", line 313, in warm_up\n    s.start()\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 115, in start\n    self.module = load_module(self.spec)\n  File \"/Users/wad/src/poker-hackathon-kit/lab/inproc.py\", line 69, in load_module\n    mspec.loader.exec_module(module)\n  File \"<frozen importlib._bootstrap_external>\", line 883, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 241, in _call_with_frames_removed\n  File \"/Users/wad/src/poker-hackathon-kit/lab/ext/advitrocks9_fullhouse-bot/bot/bot.py\", line 16, in <module>\n    from bot.features import (\n  File \"/Users/wad/src/poker-hackathon-kit/lab/ext/advitrocks9_fullhouse-bot/bot/bot.py\", line 16, in <module>\n    from bot.features import (\nModuleNotFoundError: No module named 'bot.features'; 'bot' is not a package\n"
+ ]
+}

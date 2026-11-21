@@ -1,0 +1,20 @@
+{
+ "label": "v1d_broad",
+ "hero": "my_bots/redteamers007",
+ "opps": "core,rand20,exploit",
+ "pairs": 20,
+ "seeds": "dev",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "my_bots/redteamers007",
+  "--opps",
+  "core,rand20,exploit",
+  "--pairs",
+  "20",
+  "--label",
+  "v1d_broad"
+ ]
+}

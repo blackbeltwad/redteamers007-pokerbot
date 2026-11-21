@@ -1,0 +1,22 @@
+{
+ "label": "ext_smoke",
+ "hero": "snap:v1",
+ "opps": "ext",
+ "pairs": 1,
+ "seeds": "dev",
+ "start": 0,
+ "tf": 2.0,
+ "argv": [
+  "/Users/wad/src/poker-hackathon-kit/lab/run.py",
+  "--hero",
+  "snap:v1",
+  "--opps",
+  "ext",
+  "--pairs",
+  "1",
+  "--workers",
+  "2",
+  "--label",
+  "ext_smoke"
+ ]
+}

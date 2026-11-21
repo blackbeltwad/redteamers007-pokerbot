@@ -145,6 +145,12 @@ def hand_stats(h, me, opp, C, side):
         C["sd"] += 1
         if delta > 0:
             C["sd_won"] += 1
+    # line attribution (hero only: debug is kept for hero): hand result -> last decision's line
+    last = next((a for a in reversed(acts) if a["bot"] == me and isinstance(a.get("dbg"), dict)), None)
+    if last is not None:
+        key = f"L|{last['st']}:{last['dbg'].get('line', '?')}:{last['act']}"
+        C[key + "|n"] += 1
+        C[key + "|bb"] += delta / bb
     # side prizes
     hole = h["hole"][me]
     if sorted(c[0] for c in hole) == ["2", "7"]:
@@ -276,13 +282,14 @@ def aggregate(matches):
                 **{"72_won": hero_all.get("72_won", 0), "72_dealt": hero_all.get("72_dealt", 0)})
     p, lo, hi = wilson(tot["W"], tot["N"])
     think_p99.sort()
+    overall_counters = dict(hero_all)
     overall = {**tot, "winrate": p, "lo": lo, "hi": hi, "hero": style_row(hero_all),
                "timeouts": hero_all.get("timeouts", 0), "errors": hero_all.get("errors", 0),
                "think_mean": ratio(hero_all, "think_sum", "decisions"),
                "think_p99_worst_match": think_p99[-1] if think_p99 else 0,
                "think_p99_median_match": think_p99[len(think_p99) // 2] if think_p99 else 0,
                "crashes": len(crashes)}
-    return {"overall": overall, "by_opp": rows, "side": side, "crash_samples": [c["crash"] for c in crashes[:3]]}
+    return {"overall": overall, "hero_counters": overall_counters, "by_opp": rows, "side": side, "crash_samples": [c["crash"] for c in crashes[:3]]}
 
 
 def fmt(x, pct=True):
@@ -293,6 +300,7 @@ def fmt(x, pct=True):
 
 def write_summary(outdir, agg, meta):
     o = agg["overall"]
+    h_all = agg.get("hero_counters", {})
     L = [f"# {meta['label']}  hero={meta['hero']}  seeds={meta['seeds']}  pairs/opp={meta['pairs']}  tf={meta['tf']}", "",
          f"**Overall match win {100 * o['winrate']:.1f}% [{100 * o['lo']:.1f}, {100 * o['hi']:.1f}]**  "
          f"N={o['N']}  pairs WW-D-LL {o['WW']}-{o['D']}-{o['LL']}  timeouts={o['timeouts']:.0f} errors={o['errors']:.0f} "
@@ -305,6 +313,12 @@ def write_summary(outdir, agg, meta):
                  f"{r['avg_hands']:.0f} | {fmt(h['bb/100'], False)} | {fmt(h['VPIP'])}/{fmt(h['PFR'])}/{fmt(h['3B'])} | {fmt(h['AF'], False)} | "
                  f"{fmt(p['VPIP'])}/{fmt(p['PFR'])}/{fmt(p['3B'])} | {fmt(p['FtbF'])}/{fmt(p['FtbT'])}/{fmt(p['FtbR'])} | {fmt(p['AF'], False)} |")
     h = o["hero"]
+    lines = sorted(((k[2:-2], v, h_all.get(k[:-2] + "|bb", 0)) for k, v in h_all.items() if k.startswith("L|") and k.endswith("|n")),
+                   key=lambda x: x[2])
+    hands_all = max(1, h_all.get("hands", 1))
+    L += ["", "Hero result by final line (bb/100 hands contribution, count): " + "  ".join(
+        f"{k}={100 * b / hands_all:+.0f}({n:.0f})" for k, n, b in lines[:8]) + "  ...  " + "  ".join(
+        f"{k}={100 * b / hands_all:+.0f}({n:.0f})" for k, n, b in lines[-5:])]
     L += ["", "Hero overall: " + "  ".join(f"{k}={fmt(v, k not in ('AF', 'AI/100', 'bb/100'))}" for k, v in h.items())]
     s = agg["side"]
     L += ["", f"Side: bluff chips/1000h={1000 * s['bluff_chips'] / max(1, s['hands']):.0f}  "
@@ -331,6 +345,8 @@ def main(argv=None):
     a = ap.parse_args(argv)
 
     opps = resolve_opps(a.opps)
+    if a.hero.startswith("snap:"):
+        a.hero = f"lab/snapshots/{a.hero[5:]}"
     if a.resume:
         outdir = Path(a.resume)
     else:

@@ -1,5 +1,58 @@
 # Experiments log (read this first every session)
 
+## >>> HANDOFF: START HERE (written by the previous Claude session, 2026-11-21 afternoon) <<<
+You are taking over from another Claude session. It is no longer making changes. Everything it knew is below.
+
+**State:** `main` = **v2.1** (tag `v2.1`), the submitted bot, gate-passed, `make validate` OK, verified in the real
+Docker sandbox (p99 <= 31ms at 0.5 CPU, 0 errors; lab fast path == docker decision-for-decision).
+Branches `v2-candidate` and `exp/eval7-seed` are already merged; ignore them. Team folder: `my_bots/redteamers007/`.
+Repo: github.com/blackbeltwad/redteamers007-pokerbot (`origin`); organisers' kit = `upstream`. Competition starts 7 PM;
+end of coding unconfirmed (ask the user). Keep `main` always holding a gate-passed bot.
+
+**Setup on a new machine:**
+```
+uv python install 3.10 && uv venv --seed -p 3.10 .venv && source .venv/bin/activate && make install PYTHON=python
+```
+Committed and ready: `lab/data/preflop.json`, `lab/data/dataset_profiles.json`, snapshots `lab/snapshots/v0..v2_1`.
+NOT in git (gitignored), fetch if you want those opponents:
+- `ext` set (13 public Fullhouse 2026 bots, same engine): for each path in `EXT` in `lab/opponents/sets.py`,
+  `git clone --depth 1 https://github.com/<owner>/<repo> lab/ext/<owner>_<repo>` (owner_repo = first path part),
+  pinned commits listed in "External sparring bots" below. Run `python pokercore/validator.py <bot dir>` on each first.
+- Pluribus/WSOP hands (only to rebuild the dataset profiles): `git clone --depth 1 --filter=blob:none --sparse
+  https://github.com/uoftcprg/phh-dataset lab/datasets/phh-dataset && cd lab/datasets/phh-dataset &&
+  git sparse-checkout set data/pluribus data/wsop`.
+
+**Commands:**
+- Screen (dev seeds): `python -m lab.run --hero my_bots/redteamers007 --opps core,rand20,exploit,ext,dataset --pairs 20 --label <name>`
+  (drop `ext` if not fetched). Read `lab/results/<ts>_<name>/summary.md`, never raw logs.
+- A/B a tunable without editing the bot: `--hero "lab/snapshots/vN::bluff_prior=0.3"` (bot has `TUNE` + `configure()`,
+  never called by the sandbox). Add new knobs to `TUNE` the same way.
+- Leak finder: `python -m lab.tools.lines lab/results/<dir> [opp]` (chips won/lost per decision line, from bot debug).
+- Snapshot: `lab/snapshot.sh vN`. Gate (hold-out seeds, the only accept test):
+  `python -m lab.gate --cand snap:vNEW --best snap:v2_1 --opps core,rand20,exploit,ext,dataset`.
+- Dataset -> sparring bots: `python -m lab.tools.phh_stats <dir of .phh files>` (streams any size, e.g. the user's 20 GB
+  Zenodo archive; for heads-up ACPC data set HU_SCALE=1.0).
+- Docker: `make sandbox` once; `python play.py my_bots/redteamers007 bots/caller --docker --seed 1 --log /tmp/d.jsonl`
+  then `python lab/tools/fidelity.py my_bots/redteamers007,bots/caller 1 /tmp/d.jsonl`. Re-run before the freeze.
+  (Docker CLI may need `export PATH=/usr/local/bin:$PATH` and `open -a Docker` first.)
+
+**Gotchas (each cost us time):**
+- `eval7.py_hand_vs_range_monte_carlo` IGNORES range weights -> the bot samples combos by weight itself.
+- eval7's C RNG is clock-seeded -> bot reseeds it per decision (`eval7.xorshift_rand.seed`). Keep that line.
+- Don't run two big lab jobs at once on one machine: it inflates think-time p99 and can fake gate timing failures.
+- Most duplicate pairs are draws (cards dominate); edges show in WW vs LL. Use >=100 pairs/opp to accept anything.
+
+**Suggested next steps (highest value first):**
+1. 3-bet defence: we over-fold to preflop 3-bets/4-bets; weakest real matchup `e_gunslinger` ~67%. Check
+   `lines` for `preflop:vs_raise:fold`; consider calling/4-betting wider vs high measured `bb_3bet`/`sb_open`.
+2. Late-game push/fold (5-20bb with antes): verify `pf_push`/`pf_reshove`/`vs_allin` lines aren't losing; PF_BB=13 threshold.
+3. Opponents stronger than us (all current ones lose to v2.1): a self-play exploiter of v2.1, or the ACPC heads-up data.
+4. Side prizes only if the gate shows they're free (7-2 opens from SB, bluffs); counters already in `summary.md`.
+5. Write a short presentation doc for the judges (design = Nash push/fold + range-vs-range baseline; exploit layer =
+   shrunk opponent frequencies + showdown-calibrated bluff ratio; evidence = this log).
+## >>> END HANDOFF <<<
+
+
 Setup: Python 3.10 venv at .venv (`source .venv/bin/activate`). Lab = `python -m lab.run`, gate = `python -m lab.gate`.
 Seeds: `dev` for development/screening, `holdout` only for gate decisions. Pair = same seed, seats swapped, standard blinds, freezeout.
 Time factor tf=2.0 (local ms x2 ~ half-core). Opp sets: `core`, `randN`, `exploit`, `ext`, `dataset`, `snap:<v>` (defined in lab/opponents/sets.py).

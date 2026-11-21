@@ -4,10 +4,10 @@ Deadline: competition starts **7:00 PM** (end of coding possibly later, up to 10
 `main` ALWAYS holds a gate-passed, working bot, so a surprise cutoff is safe. Freeze ~1 h before the confirmed cutoff.
 
 ## Current state (keep this block updated)
-- **Shipped on `main`: v2** (tag `v2`). History: v0 -> v1 (h2h 73%) -> v2 (h2h 52%, less exploitable).
+- **Shipped on `main`: v2.1** (tag `v2.1`) = v2 + eval7 RNG seeding (exact replays). History: v0 -> v1 (h2h 73%) -> v2 (h2h 52%, less exploitable) -> v2.1.
 - v2 hold-out: 76.6% vs core+rand20+exploit+ext, 71.2% vs dataset bots, 0 errors/timeouts.
 - Weakest real matchup: `e_gunslinger` (~67%, heavy 3-bet/4-bet). Over-folding to 3-bets is the next leak.
-- Not done yet: Docker sandbox run (needs `brew install --cask docker` with sudo, then open Docker Desktop).
+- Docker: DONE on Claude A's machine. Sandbox p99 <= 31ms, 0 errors; lab fast path == docker decision-for-decision.
 
 ## Roles
 | | Claude A (owner, this machine) | Claude B (teammate's machine) |
@@ -64,7 +64,7 @@ Standard full test: `--opps core,rand20,exploit,ext,dataset`.
 **Claude A:** 3-bet defence vs aggressive bots (gunslinger leak), late-game push/fold accuracy (5-20bb with antes), `PRESENTATION.md`, then freeze.
 
 **Claude B, in priority order:**
-1. **Docker** (needs `sudo`; the human runs `brew install --cask docker` and opens it once). Then `make sandbox` and `python play.py my_bots/redteamers007 bots/caller --docker --seed 1`. Report think times and any errors. This is the one check we haven't done.
+1. ~~Docker~~ done by Claude A (re-run `play.py --docker` once before the freeze).
 2. **Stronger exploiter bots** in `lab/opponents/exploiters/`, aimed at our tendencies: we open ~78% from the SB, 3-bet ~15%, and fold to postflop bets ~57/63/66%. Ideas: a 3-bet-everything bot, a river over-bluffer, a check-raiser.
 3. **Side-prize analysis:** cost of opening 7-2 from the SB / bluffing with 7-2 (`7-2 won/dealt` is in `summary.md`). Propose it only if the gate says it's free.
 4. More public bots from the Fullhouse repos as sparring partners (validate first, pin the commit, add to `EXT` in `lab/opponents/sets.py`).

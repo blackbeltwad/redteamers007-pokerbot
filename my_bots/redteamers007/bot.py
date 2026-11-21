@@ -21,6 +21,7 @@ import random
 from pathlib import Path
 
 import eval7
+import eval7.xorshift_rand as _xr
 import numpy as np
 
 # ------------------------------------------------------------------ static tables
@@ -559,6 +560,9 @@ def _warmup():
 
 
 def _decide(gs):
+    # eval7's C RNG is seeded from the clock at import; re-seed it from the sandbox-seeded `random`
+    # so every decision (and match) replays exactly
+    _xr.seed(random.getrandbits(62))
     me = gs["your_bot_id"]
     if gs["hand_num"] == 0 and not _seen_hands and OPP["hands"] == 0:
         pass
